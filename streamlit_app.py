@@ -65,27 +65,30 @@ if sentence:
                 f'{arm(ra, "#c0392b")}{arm(la, "#2980b9")}'
                 f'</svg>')
 
-    # Show in rows of 10
-    cols_per_row = 10
+    # Show in rows of 8
+    cols_per_row = 8
     for row_start in range(0, len(sequence), cols_per_row):
         row = sequence[row_start:row_start+cols_per_row]
         cols = st.columns(len(row))
         for i, ch in enumerate(row):
+            abs_i = row_start + i
+            if ch not in cg.SEMAPHORE:
+                continue
             r_key, l_key = cg.SEMAPHORE[ch]
-            if row_start + i == 0:
+            if abs_i == 0:
                 label = 'REST'
             elif ch == ' ':
-                label = '·'
+                label = '_'
             elif ch == 'NUM':
                 label = '#'
-            elif ch == 'J' and sequence[row_start + i - 1] if row_start + i > 0 else False:
+            elif ch == 'J':
                 label = 'ABC'
             else:
                 label = ch
             with cols[i]:
                 st.markdown(f"<div style='text-align:center'>"
                            f"<b>{label}</b><br>"
-                           f"{draw_semaphore_svg(r_key, l_key)}<br>"
+                           f"{draw_semaphore_svg(r_key, l_key, size=60)}<br>"
                            f"<small style='color:#888'>{r_key}/{l_key}</small>"
                            f"</div>", unsafe_allow_html=True)
 
