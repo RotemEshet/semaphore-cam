@@ -42,21 +42,22 @@ if sentence:
 
     import math
 
-    def draw_semaphore_svg(r_key, l_key, size=48):
+    def draw_semaphore_svg(r_key, l_key, size=72):
         RIGHT_ANG = {'BL':45,'B':90,'BR':135,'R':180,'UR':225,'U':270,'UL':315}
         LEFT_ANG  = {'BR':135,'B':90,'BL':45,'L':0,'UL':315,'U':270,'UR':225}
+        pad = 10
         cx = cy = size // 2
-        r  = size // 2 - 6
+        r  = size // 2 - pad
 
         def arm(deg, color):
             rad = math.radians(deg)
             ex = cx + r * math.cos(rad)
             ey = cy + r * math.sin(rad)
-            fx = cx + (r+5) * math.cos(rad)
-            fy = cy + (r+5) * math.sin(rad)
+            fx = cx + (r + 6) * math.cos(rad)
+            fy = cy + (r + 6) * math.sin(rad)
             return (f'<line x1="{cx}" y1="{cy}" x2="{ex:.1f}" y2="{ey:.1f}" '
                     f'stroke="{color}" stroke-width="3" stroke-linecap="round"/>'
-                    f'<circle cx="{fx:.1f}" cy="{fy:.1f}" r="4" fill="{color}"/>')
+                    f'<circle cx="{fx:.1f}" cy="{fy:.1f}" r="5" fill="{color}"/>')
 
         ra = RIGHT_ANG.get(r_key, 90)
         la = LEFT_ANG.get(l_key, 90)
@@ -88,7 +89,7 @@ if sentence:
             with cols[i]:
                 st.markdown(f"<div style='text-align:center'>"
                            f"<b>{label}</b><br>"
-                           f"{draw_semaphore_svg(r_key, l_key, size=60)}<br>"
+                           f"{draw_semaphore_svg(r_key, l_key, size=72)}<br>"
                            f"<small style='color:#888'>{r_key}/{l_key}</small>"
                            f"</div>", unsafe_allow_html=True)
 
