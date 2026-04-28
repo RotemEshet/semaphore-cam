@@ -12,11 +12,13 @@ st.title("🚩 Semaphore Cam Generator")
 st.caption("Enter any word or sentence to generate a 3D-printable cylindrical cam that encodes it in flag semaphore.")
 
 # ── Input ──────────────────────────────────────────────────────────────────
-sentence = st.text_input("Word or sentence", placeholder="e.g. HELLO or ONCE UPON A TIME").upper().strip()
+sentence = st.text_input("Word or sentence", placeholder="e.g. your name or a short word").upper().strip()
 
 if sentence:
     # Validate
-    bad = [c for c in sentence if c not in cg.SEMAPHORE]
+    # Expand digits to semaphore signals first
+    expanded = cg.expand_input(sentence)
+    bad = [c for c in expanded if c not in cg.SEMAPHORE]
     if bad:
         st.error(f"Characters not in semaphore alphabet: {', '.join(set(bad))}")
         st.stop()
@@ -41,8 +43,8 @@ if sentence:
     import math
 
     def draw_semaphore_svg(r_key, l_key, size=48):
-        RIGHT_ANG = {'BL':135,'B':90,'BR':45,'R':0,'UR':315,'U':270,'UL':225}
-        LEFT_ANG  = {'BR':45, 'B':90,'BL':135,'L':180,'UL':225,'U':270,'UR':315}
+        RIGHT_ANG = {'BL':45,'B':90,'BR':135,'R':180,'UR':225,'U':270,'UL':315}
+        LEFT_ANG  = {'BR':135,'B':90,'BL':45,'L':0,'UL':315,'U':270,'UR':225}
         cx = cy = size // 2
         r  = size // 2 - 6
 
@@ -108,15 +110,3 @@ if sentence:
             except Exception as e:
                 st.error(f"Error: {e}")
 
-with st.expander("About"):
-    st.markdown("""
-Two helical grooves cut into a cylindrical cam encode a word or sentence in
-[flag semaphore](https://en.wikipedia.org/wiki/Flag_semaphore).
-As the cam rotates, two followers drive flag arms to spell out the message.
-
-- 🔴 Red arm = right arm (inner groove)
-- 🔵 Blue arm = left arm (outer groove)
-- Wall thickness: 15mm
-- Groove: half-ellipse, 3.2mm deep × 4mm tall
-- Arc per letter: 15.7mm (adjustable in code)
-    """)

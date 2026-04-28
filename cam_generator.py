@@ -24,6 +24,38 @@ SEMAPHORE = {
     'Y':('UR','L'),  'Z':('BL','L'),  ' ':('B', 'B'),
 }
 
+# Number mode signals
+SEMAPHORE['NUM'] = ('U', 'UL')   # numbers follow signal
+# J is already in SEMAPHORE as letters follow signal: ('U', 'L')
+# Digit mapping: 1-9 = A-I, 0 = K
+DIGIT_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D','5':'E',
+                   '6':'F','7':'G','8':'H','9':'I','0':'K'}
+
+def expand_input(text):
+    """
+    Convert raw text (may contain digits) into a sequence of semaphore
+    characters, inserting NUM and J signals automatically.
+    """
+    text = text.upper()
+    result = []
+    in_number_mode = False
+    for i, ch in enumerate(text):
+        if ch.isdigit():
+            if not in_number_mode:
+                result.append('NUM')
+                in_number_mode = True
+            result.append(DIGIT_TO_LETTER[ch])
+        elif ch == ' ':
+            result.append(' ')
+        else:
+            if in_number_mode:
+                remaining = text[i:]
+                if any(c.isalpha() for c in remaining):
+                    result.append('J')
+                in_number_mode = False
+            result.append(ch)
+    return result
+
 def letter_to_zs(ch):
     r, l = SEMAPHORE[ch]
     return RIGHT_Z[r], LEFT_Z[l]
@@ -222,11 +254,12 @@ def generate_cam(word, output_path):
     word = word.upper().strip()
     if len(word) != N_LETTERS:
         raise ValueError(f"Word must be {N_LETTERS} letters, got '{word}' ({len(word)})")
-    for ch in word:
-        if ch not in SEMAPHORE:
-            raise ValueError(f"'{ch}' not in semaphore alphabet")
+    expanded = expand_input(word)
+    bad = [ch for ch in expanded if ch not in SEMAPHORE]
+    if bad:
+        raise ValueError(f"Characters not supported: {bad}")
 
-    sequence = [' '] + list(word)
+    sequence = [' '] + expanded
     inner_zs = [letter_to_zs(ch)[0] for ch in sequence]
     outer_zs = [letter_to_zs(ch)[1] for ch in sequence]
 
@@ -257,11 +290,12 @@ def generate_sentence(sentence, output_path):
     global N_ANCHORS, R_INNER, R_OUTER, HOLE_PCD_R
 
     sentence = sentence.upper().strip()
-    for ch in sentence:
-        if ch not in SEMAPHORE:
-            raise ValueError(f"'{ch}' not in semaphore alphabet")
+    expanded = expand_input(sentence)
+    bad = [ch for ch in expanded if ch not in SEMAPHORE]
+    if bad:
+        raise ValueError(f"Characters not supported: {bad}")
 
-    sequence = [' '] + list(sentence)  # rest + full sentence
+    sequence = [' '] + expanded
     N_ANCHORS = len(sequence)
     R_INNER   = (ARC_PER_SEGMENT * N_ANCHORS) / (2 * np.pi)
     R_OUTER   = R_INNER + 15.0
