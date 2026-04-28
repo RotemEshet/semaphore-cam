@@ -24,7 +24,7 @@ if sentence:
         st.stop()
 
     # Calculate dimensions
-    sequence  = [' '] + list(sentence)
+    sequence  = [' '] + expanded
     n_anchors = len(sequence)
     r_inner   = (cg.ARC_PER_SEGMENT * n_anchors) / (2 * np.pi)
     r_outer   = r_inner + 15.0
@@ -42,26 +42,28 @@ if sentence:
 
     import math
 
-    def draw_semaphore_svg(r_key, l_key, size=72):
+    def draw_semaphore_svg(r_key, l_key, size=80):
         RIGHT_ANG = {'BL':45,'B':90,'BR':135,'R':180,'UR':225,'U':270,'UL':315}
         LEFT_ANG  = {'BR':135,'B':90,'BL':45,'L':0,'UL':315,'U':270,'UR':225}
-        pad = 10
+        pad = 16  # enough room for arm + flag circle
         cx = cy = size // 2
-        r  = size // 2 - pad
+        r  = size // 2 - pad  # arm length
+        flag_r = 5             # flag circle radius
 
         def arm(deg, color):
             rad = math.radians(deg)
             ex = cx + r * math.cos(rad)
             ey = cy + r * math.sin(rad)
-            fx = cx + (r + 6) * math.cos(rad)
-            fy = cy + (r + 6) * math.sin(rad)
+            # Flag sits at tip of arm, fully inside viewbox
+            fx = cx + (r + flag_r) * math.cos(rad)
+            fy = cy + (r + flag_r) * math.sin(rad)
             return (f'<line x1="{cx}" y1="{cy}" x2="{ex:.1f}" y2="{ey:.1f}" '
                     f'stroke="{color}" stroke-width="3" stroke-linecap="round"/>'
-                    f'<circle cx="{fx:.1f}" cy="{fy:.1f}" r="5" fill="{color}"/>')
+                    f'<circle cx="{fx:.1f}" cy="{fy:.1f}" r="{flag_r}" fill="{color}"/>')
 
         ra = RIGHT_ANG.get(r_key, 90)
         la = LEFT_ANG.get(l_key, 90)
-        return (f'<svg width="{size}" height="{size}" xmlns="http://www.w3.org/2000/svg">'
+        return (f'<svg width="{size}" height="{size}" viewBox="0 0 {size} {size}" xmlns="http://www.w3.org/2000/svg">'
                 f'<circle cx="{cx}" cy="{cy}" r="4" fill="#555"/>'
                 f'{arm(ra, "#c0392b")}{arm(la, "#2980b9")}'
                 f'</svg>')
@@ -89,7 +91,7 @@ if sentence:
             with cols[i]:
                 st.markdown(f"<div style='text-align:center'>"
                            f"<b>{label}</b><br>"
-                           f"{draw_semaphore_svg(r_key, l_key, size=72)}<br>"
+                           f"{draw_semaphore_svg(r_key, l_key, size=80)}<br>"
                            f"<small style='color:#888'>{r_key}/{l_key}</small>"
                            f"</div>", unsafe_allow_html=True)
 
