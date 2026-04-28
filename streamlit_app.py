@@ -72,7 +72,16 @@ if sentence:
         cols = st.columns(len(row))
         for i, ch in enumerate(row):
             r_key, l_key = cg.SEMAPHORE[ch]
-            label = 'REST' if (row_start + i == 0) else (ch if ch != ' ' else '·')
+            if row_start + i == 0:
+                label = 'REST'
+            elif ch == ' ':
+                label = '·'
+            elif ch == 'NUM':
+                label = '#'
+            elif ch == 'J' and sequence[row_start + i - 1] if row_start + i > 0 else False:
+                label = 'ABC'
+            else:
+                label = ch
             with cols[i]:
                 st.markdown(f"<div style='text-align:center'>"
                            f"<b>{label}</b><br>"
